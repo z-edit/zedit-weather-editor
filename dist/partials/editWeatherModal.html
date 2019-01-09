@@ -1,0 +1,72 @@
+<style>
+    h2 .path {
+        font-size: 14px;
+        font-weight: normal;
+    }
+
+    .edit-weather-modal .modal-container .modal {
+        max-width: 1000px;
+        margin: 50px auto;
+    }
+
+    .layer-name {
+        margin-top: 12px;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .layer-speed > span {
+        width: 59px;
+        display: inline-block;
+    }
+
+    .layer-speed input[type="text"] {
+        width: 90px;
+        margin-left: 6px;
+    }
+
+    .cloud-layer {
+        display: flex;
+        margin: 6px 0;
+    }
+
+    .cloud-layer .colors {
+        display: flex;
+    }
+
+    .cloud-layer .colors > div {
+        margin: 2px 10px;
+        text-align: center;
+    }
+
+    alpha-input input {
+        width: 50px;
+        text-align: center;
+        border-radius: 5px;
+    }
+
+    texture-selector {
+        padding: 8px 16px;
+        display: block;
+    }
+</style>
+
+<div class="modal-container" unfocus-modal>
+    <div class="modal tabs-modal">
+        <div class="close-modal" ng-click="$emit('closeModal')"></div>
+
+        <div class="tabs-container">
+            <div ng-repeat="tab in tabs" class="tab" ng-class="{'selected': tab.selected}" ng-click="onTabClick($event, tab)">
+                {{::tab.label}}
+            </div>
+        </div>
+
+        <div class="tab-contents">
+            <ng-include src="currentTab.templateUrl" dyn-controller="currentTab.controller" ng-class="{'flex' : currentTab.customActions}"></ng-include>
+
+            <div class="primary-actions" ng-if="!currentTab.customActions">
+                <button type="button" class="action-btn" ng-click="save()">OK</button>
+            </div>
+        </div>
+    </div>
+</div>

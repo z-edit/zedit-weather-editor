@@ -1,0 +1,55 @@
+<h2>Edit Weather - Clouds
+    <div class="path">{{::path}}</div>
+</h2>
+
+<h3>Cloud Layers
+    <dropdown class="buttonbox nowrap by-header" items="disabledLayers" on-item-click="addLayer" max-height="300">
+        <dropdown-display>
+            <button class="action-btn positive small">Add Layer</button>
+        </dropdown-display>
+        <dropdown-item>Layer {{::$parent.item.index}}</dropdown-item>
+    </dropdown>
+</h3>
+<section class="cloud-layers">
+    <div class="cloud-layer" ng-repeat="layer in cloudLayers">
+        <div>
+            <div class="layer-name">Layer {{::layer.index}}</div>
+            <label class="layer-speed">
+                <span>X Speed</span>
+                <input type="text" ng-model="layer.xSpeed" />
+            </label>
+            <label class="layer-speed">
+                <span>Y Speed</span>
+                <input type="text" ng-model="layer.ySpeed" />
+            </label>
+        </div>
+        <div>
+            <texture-selector texture="layer.texture" key="textures/sky"></texture-selector>
+        </div>
+        <div class="colors">
+            <div>
+                <span class="color-label">Sunrise</span>
+                <color-selector color="layer.sunriseColor" key="colors/weather"></color-selector>
+                <alpha-input color="layer.sunriseColor"></alpha-input>
+            </div>
+            <div>
+                <span class="color-label">Day</span>
+                <color-selector color="layer.dayColor" key="colors/weather"></color-selector>
+                <alpha-input color="layer.dayColor"></alpha-input>
+            </div>
+            <div>
+                <span class="color-label">Sunset</span>
+                <color-selector color="layer.sunsetColor" key="colors/weather"></color-selector>
+                <alpha-input color="layer.sunsetColor"></alpha-input>
+            </div>
+            <div>
+                <span class="color-label">Night</span>
+                <color-selector color="layer.nightColor" key="colors/weather"></color-selector>
+                <alpha-input color="layer.nightColor"></alpha-input>
+            </div>
+        </div>
+        <div>
+            <div class="remove-item" title="Disable cloud layer" ng-click="disableLayer($index)"></div>
+        </div>
+    </div>
+</section>
