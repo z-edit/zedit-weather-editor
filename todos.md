@@ -7,12 +7,10 @@
 5. Color selector default options
 6. Fix color selector custom option display
 7. Add Layer dropdown maximum height
-8. Do not allow layers 29, 30, or 31 for Skyrim Classic or SSE
-9. Create GitHub repository
-10. Save cloud values to record
-11. Add colors tab
-12. Add dalc tab
-13. Add functions tab
+8. Save cloud values to record
+9. Add colors tab
+10. Add dalc tab
+11. Add functions tab
     - Clear unused data option
     - Copy clouds from other weather
     - Copy Colors from other weather

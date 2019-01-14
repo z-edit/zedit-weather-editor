@@ -1,5 +1,7 @@
 /* global ngapp, xelib, modulePath */
+//= require ./src/cloudLayerService.js
 //= require ./src/recentService.js
+//= require ./src/resourceService.js
 //= require ./src/alphaInput.js
 //= require ./src/colorSelector.js
 //= require ./src/textureSelector.js
