@@ -7,11 +7,7 @@
 //= require ./src/classes/SSEWeather.js
 //= require ./src/classes/FO4Weather.js
 //= require ./src/weatherService.js
-//= require ./src/recentService.js
-//= require ./src/resourceService.js
 //= require ./src/alphaInput.js
-//= require ./src/colorSelector.js
-//= require ./src/textureSelector.js
 //= require ./src/editWeatherModal.js
 //= require ./src/editWeather/clouds.js
 
