@@ -1,10 +1,10 @@
 ngapp.controller('editWeatherModalController', function($scope, tabService) {
     // initialization
-    let node = $scope.modalOptions.nodes.last();
+    let node = $scope.modalOptions.nodes.last(),
+        name = xelib.Name(node.handle);
     $scope.handle = node.handle;
-    $scope.name = xelib.Name($scope.handle);
     xelib.WithHandle(xelib.GetElementFile($scope.handle), file => {
-        $scope.filename = xelib.Name(file);
+        $scope.path = `${xelib.Name(file)}\\${name}`;
     });
 
     $scope.tabs = [{
