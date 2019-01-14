@@ -20,5 +20,9 @@ class Weather {
                 colors = this.getCloudLayerColors(index);
             return { index, disabled, speed, texture, colors };
         });
-    }
+    };
+
+    save = () => {
+        // TODO
+    };
 }
