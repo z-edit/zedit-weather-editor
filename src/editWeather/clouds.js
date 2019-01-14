@@ -3,11 +3,9 @@ ngapp.controller('editWeatherCloudsController', function($scope) {
     $scope.cloudLayers = [];
 
     let loadLayers = function() {
-        xelib.WithHandleGroup(() => {
-            $scope.weather.getCloudLayers().forEach(layer => {
-                let key = layer.disabled ? 'disabledLayers' : 'cloudLayers';
-                $scope[key].push(layer);
-            });
+        $scope.weather.getCloudLayers().forEach(layer => {
+            let key = layer.disabled ? 'disabledLayers' : 'cloudLayers';
+            $scope[key].push(layer);
         });
     };
 

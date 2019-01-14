@@ -26,4 +26,7 @@ ngapp.controller('editWeatherModalController', function($scope, tabService, weat
         $scope.weather.save();
         $scope.$emit('closeModal');
     };
+
+    // event handlers
+    $scope.$on('$destroy', $scope.weather.release);
 });
