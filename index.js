@@ -1,5 +1,12 @@
 /* global ngapp, xelib, modulePath */
-//= require ./src/cloudLayerService.js
+//= require ./src/classes/Weather.js
+//= require ./src/classes/TES4Weather.js
+//= require ./src/classes/FO3Weather.js
+//= require ./src/classes/FNVWeather.js
+//= require ./src/classes/TES5Weather.js
+//= require ./src/classes/SSEWeather.js
+//= require ./src/classes/FO4Weather.js
+//= require ./src/weatherService.js
 //= require ./src/recentService.js
 //= require ./src/resourceService.js
 //= require ./src/alphaInput.js

@@ -1,9 +1,9 @@
-ngapp.controller('editWeatherModalController', function($scope, tabService) {
+ngapp.controller('editWeatherModalController', function($scope, tabService, weatherService) {
     // initialization
     let node = $scope.modalOptions.nodes.last(),
         name = xelib.Name(node.handle);
-    $scope.handle = node.handle;
-    xelib.WithHandle(xelib.GetElementFile($scope.handle), file => {
+    $scope.weather = new weatherService.Weather(node.handle);
+    xelib.WithHandle(xelib.GetElementFile(node.handle), file => {
         $scope.path = `${xelib.Name(file)}\\${name}`;
     });
 

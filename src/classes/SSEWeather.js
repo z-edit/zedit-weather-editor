@@ -1,0 +1,1 @@
+class SSEWeather extends TES5Weather {}

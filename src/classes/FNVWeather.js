@@ -1,0 +1,1 @@
+class FNVWeather extends FO3Weather {}

@@ -1,0 +1,1 @@
+class FO4Weather extends TES5Weather {}
