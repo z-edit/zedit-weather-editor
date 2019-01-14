@@ -1,18 +1,24 @@
 class Weather {
-    static colorLabels = ['Sunrise', 'Day', 'Sunset', 'Night'];
+    static get colorLabels() {
+        return ['Sunrise', 'Day', 'Sunset', 'Night'];
+    }
 
     constructor(handle) {
         this.handle = handle;
         this.cache = {};
     }
 
-    cacheElement = path => {
+    release() {
+        Object.values(this.cache).forEach(id => xelib.Release(id));
+    }
+
+    cacheElement(path) {
         if (!this.cache.hasOwnProperty(path))
             this.cache[path] = xelib.GetElement(this.handle, path);
         return this.cache[path];
-    };
+    }
 
-    getCloudLayers = () => {
+    getCloudLayers() {
         return this.cloudTexturePaths.map((path, index) => {
             let texture = xelib.GetValue(this.handle, path),
                 speed = this.getCloudLayerSpeed(index),
@@ -20,9 +26,9 @@ class Weather {
                 colors = this.getCloudLayerColors(index);
             return { index, disabled, speed, texture, colors };
         });
-    };
+    }
 
-    save = () => {
+    save() {
         // TODO
-    };
+    }
 }
