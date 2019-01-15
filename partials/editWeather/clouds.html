@@ -14,15 +14,15 @@
     <div class="cloud-layer" ng-repeat="layer in cloudLayers">
         <div>
             <div class="layer-name">Layer {{::layer.index}}</div>
-            <label class="layer-speed" ng-if="::layer.speed.x">
+            <label class="layer-speed" ng-if="::layer.speed.hasOwnProperty('x')">
                 <span>X Speed</span>
                 <input type="text" ng-model="layer.speed.x" />
             </label>
-            <label class="layer-speed" ng-if="::layer.speed.y">
+            <label class="layer-speed" ng-if="::layer.speed.hasOwnProperty('y')">
                 <span>Y Speed</span>
                 <input type="text" ng-model="layer.speed.y" />
             </label>
-            <label class="layer-speed" ng-if="::!layer.speed.x">
+            <label class="layer-speed" ng-if="::!layer.speed.hasOwnProperty('x')">
                 <span>Speed</span>
                 <input type="text" ng-model="layer.speed" />
             </label>
