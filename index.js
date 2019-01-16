@@ -8,6 +8,7 @@
 //= require ./src/classes/FO4Weather.js
 //= require ./src/weatherService.js
 //= require ./src/alphaInput.js
+//= require ./src/cloudSpeedInput.js
 //= require ./src/editWeatherModal.js
 //= require ./src/editWeather/clouds.js
 

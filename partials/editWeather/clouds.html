@@ -16,15 +16,15 @@
             <div class="layer-name">Layer {{::layer.index}}</div>
             <label class="layer-speed" ng-if="::layer.speed.hasOwnProperty('x')">
                 <span>X Speed</span>
-                <input type="text" ng-model="layer.speed.x" />
+                <cloud-speed-input speed="layer.speed.x"></cloud-speed-input>
             </label>
             <label class="layer-speed" ng-if="::layer.speed.hasOwnProperty('y')">
                 <span>Y Speed</span>
-                <input type="text" ng-model="layer.speed.y" />
+                <cloud-speed-input speed="layer.speed.y"></cloud-speed-input>
             </label>
             <label class="layer-speed" ng-if="::!layer.speed.hasOwnProperty('x')">
                 <span>Speed</span>
-                <input type="text" ng-model="layer.speed" />
+                <cloud-speed-input speed="layer.speed"></cloud-speed-input>
             </label>
         </div>
         <div>
