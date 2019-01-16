@@ -18,11 +18,12 @@ ngapp.directive('alphaInput', function() {
                 if (e.deltaY === 0 || notFocused()) return;
                 e.preventDefault();
                 let offset = e.deltaY < 0 ? 1 : -1;
+                if (e.ctrlKey) offset *= 10;
                 try {
-                    let f = parseFloat(scope.alphaText) * 20 + offset;
-                    f = Math.max(Math.min(f, 20), 0);
+                    let f = parseFloat(scope.alphaText) * 100 + offset;
+                    f = Math.max(Math.min(f, 100), 0);
                     scope.$applyAsync(() => {
-                        scope.alphaText = (Math.round(f) / 20.0).toFixed(2);
+                        scope.alphaText = (Math.round(f) / 100.0).toFixed(2);
                     });
                 } catch (x) {}
             };

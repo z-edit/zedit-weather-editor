@@ -17,6 +17,7 @@ ngapp.directive('cloudSpeedInput', function() {
                 if (e.deltaY === 0 || notFocused()) return;
                 e.preventDefault();
                 let offset = e.deltaY < 0 ? 1 : -1;
+                if (e.ctrlKey) offset *= 10;
                 try {
                     let f = parseFloat(scope.speedText) * 200 + offset;
                     f = Math.max(Math.min(f, 200), -200);
