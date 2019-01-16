@@ -22,7 +22,7 @@ ngapp.directive('alphaInput', function() {
                     let f = parseFloat(scope.alphaText) * 20 + offset;
                     f = Math.max(Math.min(f, 20), 0);
                     scope.$applyAsync(() => {
-                        scope.alphaText = (Math.floor(f) / 20.0).toFixed(2);
+                        scope.alphaText = (Math.round(f) / 20.0).toFixed(2);
                     });
                 } catch (x) {}
             };
