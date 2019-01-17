@@ -30,11 +30,9 @@ class TES5Weather extends Weather {
     getCloudLayerColor (layerIndex, colorIndex) {
         let path = `PNAM\\[${layerIndex}]\\[${colorIndex}]`,
             alphaPath = `JNAM\\[${layerIndex}]\\[${colorIndex}]`,
-            red = xelib.GetIntValue(this.handle, `${path}\\Red`),
-            green = xelib.GetIntValue(this.handle, `${path}\\Green`),
-            blue = xelib.GetIntValue(this.handle, `${path}\\Blue`),
+            [r, g, b] = this.getRgb(this.handle, path),
             alpha = xelib.GetFloatValue(this.handle, alphaPath);
-        return new Color(`rgba(${red}, ${green}, ${blue}, ${alpha})`);
+        return new Color(`rgba(${r}, ${g}, ${b}, ${alpha})`);
     };
 
     getCloudLayerColors(layerIndex) {

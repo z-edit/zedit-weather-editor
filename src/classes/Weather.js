@@ -18,6 +18,13 @@ class Weather {
         return this.cache[path];
     }
 
+    getRgb(handle, path) {
+        let red = xelib.GetIntValue(handle, `${path}\\Red`),
+            green = xelib.GetIntValue(handle, `${path}\\Green`),
+            blue = xelib.GetIntValue(handle, `${path}\\Blue`);
+        return [red, green, blue];
+    }
+
     getCloudLayers() {
         return this.cloudTexturePaths.map((path, index) => {
             let texture = xelib.GetValue(this.handle, path),
