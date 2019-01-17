@@ -13,7 +13,8 @@ ngapp.controller('editWeatherModalController', function($scope, tabService, weat
         controller: 'editWeatherCloudsController'
     }, {
         label: 'Colors',
-        templateUrl: `${moduleUrl}/partials/editWeather/colors.html`
+        templateUrl: `${moduleUrl}/partials/editWeather/colors.html`,
+        controller: 'editWeatherColorsController'
     }, {
         label: 'Directional Ambient Lighting Colors',
         templateUrl: `${moduleUrl}/partials/editWeather/dalc.html`

@@ -2,3 +2,31 @@
     <div class="path">{{::path}}</div>
 </h2>
 
+<table>
+    <thead>
+    <tr>
+        <th></th>
+        <th>Sunrise</th>
+        <th>Day</th>
+        <th>Sunset</th>
+        <th>Night</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="group in colorGroups">
+        <td>{{::group.label}}</td>
+        <td>
+            <color-selector color="group.Sunrise" key="colors/weather"></color-selector>
+        </td>
+        <td>
+            <color-selector color="group.Day" key="colors/weather"></color-selector>
+        </td>
+        <td>
+            <color-selector color="group.Sunset" key="colors/weather"></color-selector>
+        </td>
+        <td>
+            <color-selector color="group.Night" key="colors/weather"></color-selector>
+        </td>
+    </tr>
+    </tbody>
+</table>
