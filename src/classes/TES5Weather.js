@@ -41,4 +41,17 @@ class TES5Weather extends Weather {
             return colors;
         }, {});
     };
+
+    getWeatherColors() {
+        let colors = [];
+        xelib.WithEachHandle(xelib.GetElements(this.handle, 'NAM0'), h => {
+            let group = { label: xelib.Name(h) };
+            Weather.colorLabels.forEach(label => {
+                let [r, g, b] = this.getRgb(h, label);
+                group[label] = new Color(`rgb(${r}, ${g}, ${b})`);
+            });
+            colors.push(group);
+        });
+        return colors;
+    }
 }
