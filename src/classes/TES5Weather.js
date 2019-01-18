@@ -14,18 +14,18 @@ class TES5Weather extends Weather {
             x: parseFloat(xelib.GetValue(xSpeeds, `[${layerIndex}]`)),
             y: parseFloat(xelib.GetValue(ySpeeds, `[${layerIndex}]`))
         }
-    };
+    }
 
     getDisabledCloudLayers() {
         return xelib.GetEnabledFlags(this.handle, 'NAM1')
             .map(str => parseInt(str, 10))
-    };
+    }
 
     getCloudLayerDisabled(layerIndex) {
         if (!this.hasOwnProperty('disabledLayers'))
             this.disabledLayers = this.getDisabledCloudLayers();
         return this.disabledLayers.includes(layerIndex);
-    };
+    }
 
     getCloudLayerColor (layerIndex, colorIndex) {
         let path = `PNAM\\[${layerIndex}]\\[${colorIndex}]`,
@@ -33,14 +33,14 @@ class TES5Weather extends Weather {
             [r, g, b] = this.getRgb(this.handle, path),
             alpha = xelib.GetFloatValue(this.handle, alphaPath);
         return new Color(`rgba(${r}, ${g}, ${b}, ${alpha})`);
-    };
+    }
 
     getCloudLayerColors(layerIndex) {
         return Weather.colorLabels.reduce((colors, label, colorIndex) => {
             colors[label] = this.getCloudLayerColor(layerIndex, colorIndex);
             return colors;
         }, {});
-    };
+    }
 
     getWeatherColors() {
         let colors = [];
