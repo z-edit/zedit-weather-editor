@@ -5,8 +5,14 @@ class TES4Weather extends Weather {
     }
 
     getCloudLayerSpeed(layerIndex) {
-        let data = this.cacheElement(this.handle, 'DATA - ');
+        let data = this.cacheElement('DATA - ');
         return xelib.GetIntValue(data, `[${layerIndex + 1}]`) / 255.0;
+    }
+
+    saveCloudLayerSpeed(layer) {
+        let data = this.cacheElement('DATA - '),
+            speedValue = Math.round(layer.speed * 255);
+        xelib.SetIntValue(data, `[${layer.index + 1}]`, speedValue) ;
     }
 
     getCloudLayerDisabled(layerIndex, texture) {

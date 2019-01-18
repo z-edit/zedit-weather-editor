@@ -25,15 +25,28 @@ class Weather {
         return [red, green, blue];
     }
 
+    setRgb(path, color) {
+        xelib.SetIntValue(this.handle, `${path}\\Red`, color.channel.red);
+        xelib.SetIntValue(this.handle, `${path}\\Green`, color.channel.green);
+        xelib.SetIntValue(this.handle, `${path}\\Blue`, color.channel.blue);
+    }
+
     getCloudLayers() {
-        return this.cloudTexturePaths.map((path, index) => {
+        this.cloudLayers = this.cloudTexturePaths.map((path, index) => {
             let texture = xelib.GetValue(this.handle, path),
                 speed = this.getCloudLayerSpeed(index),
                 disabled = this.getCloudLayerDisabled(index, texture),
                 colors = this.getCloudLayerColors(index);
             return { index, disabled, speed, texture, colors };
         });
+        return this.cloudLayers;
     }
+
+    getDALC() {
+        return this.dalc = null;
+    }
+
+    saveDALC() {}
 
     getWeatherColors() {
         this.colors = [];
@@ -48,11 +61,35 @@ class Weather {
         return this.colors;
     }
 
-    getDALC() {
-        return this.dalc = null;
+    saveWeatherColors() {
+        this.colors.forEach(group => {
+            Weather.colorLabels.forEach(label => {
+                this.setRgb(`NAM0\\${group.label}\\${label}`, group[label]);
+            });
+        });
+    }
+
+    saveCloudLayerTexture(layer) {
+        let texturePath = this.cloudTexturePaths[layer.index];
+        xelib.SetValue(this.handle, texturePath, layer.texture);
+    }
+
+    saveCloudLayerSpeed() {}
+    saveCloudLayerDisabled() {}
+    saveCloudLayerColors() {}
+
+    saveCloudLayers() {
+        this.cloudLayers.forEach(layer => {
+            this.saveCloudLayerTexture(layer);
+            this.saveCloudLayerSpeed(layer);
+            this.saveCloudLayerDisabled(layer);
+            this.saveCloudLayerColors(layer);
+        });
     }
 
     save() {
-        // TODO
+        this.saveCloudLayers();
+        this.saveWeatherColors();
+        this.saveDALC();
     }
 }
