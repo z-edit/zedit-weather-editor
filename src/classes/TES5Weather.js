@@ -25,8 +25,8 @@ class TES5Weather extends Weather {
     saveCloudLayerSpeed(layer) {
         let xSpeeds = this.cacheElement('Cloud Speed\\QNAM'),
             ySpeeds = this.cacheElement('Cloud Speed\\RNAM');
-        xelib.SetValue(xSpeeds, `[${layer.index}]`, layer.speed.x);
-        xelib.SetValue(ySpeeds, `[${layer.index}]`, layer.speed.y);
+        xelib.SetValue(xSpeeds, `[${layer.index}]`, `${layer.speed.x}`);
+        xelib.SetValue(ySpeeds, `[${layer.index}]`, `${layer.speed.y}`);
     }
 
     getDisabledCloudLayers() {
@@ -54,9 +54,10 @@ class TES5Weather extends Weather {
 
     saveCloudLayerColor(layer, label, colorIndex) {
         let path = `PNAM\\[${layer.index}]\\[${colorIndex}]`,
-            alphaPath = `JNAM\\[${layerIndex}]\\[${colorIndex}]`,
-            alphaValue = layer[label].channel.alpha / 255.0;
-        this.setRgb(path, layer[label]);
+            alphaPath = `JNAM\\[${layer.index}]\\[${colorIndex}]`,
+            color = layer.colors[label],
+            alphaValue = color.channel.alpha / 255.0;
+        this.setRgb(path, color);
         xelib.SetFloatValue(this.handle, alphaPath, alphaValue);
     }
 

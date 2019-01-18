@@ -29,7 +29,7 @@ class FO3Weather extends Weather {
 
     saveCloudLayerColor(layer, label, colorIndex) {
         let path = `PNAM\\[${layer.index}]\\[${colorIndex}]`;
-        this.setRgb(path, layer[label]);
+        this.setRgb(path, layer.colors[label]);
     }
 
     getCloudLayerColors(layerIndex) {

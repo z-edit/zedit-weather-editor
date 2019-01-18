@@ -71,7 +71,7 @@ class Weather {
 
     saveCloudLayerTexture(layer) {
         let texturePath = this.cloudTexturePaths[layer.index];
-        xelib.SetValue(this.handle, texturePath, layer.texture);
+        xelib.AddElementValue(this.handle, texturePath, layer.texture);
     }
 
     saveCloudLayerSpeed() {}
@@ -80,6 +80,7 @@ class Weather {
 
     saveCloudLayers() {
         this.cloudLayers.forEach(layer => {
+            if (layer.disabled) return;
             this.saveCloudLayerTexture(layer);
             this.saveCloudLayerSpeed(layer);
             this.saveCloudLayerDisabled(layer);
