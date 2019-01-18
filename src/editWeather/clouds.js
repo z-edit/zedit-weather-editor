@@ -1,31 +1,4 @@
-ngapp.controller('editWeatherCloudsController', function($scope, $timeout, recentService) {
-    let {add} = recentService;
-
-    $scope.disabledLayers = [];
-    $scope.cloudLayers = [];
-
-    let loadLayers = function() {
-        $scope.weather.getCloudLayers().forEach(layer => {
-            let key = layer.disabled ? 'disabledLayers' : 'cloudLayers';
-            $scope[key].push(layer);
-        });
-    };
-
-    let populateColors = function(colors) {
-        colors.forEach(color => {
-            color = new Color(color);
-            color.channel.alpha = 255;
-            add('colors/clouds', color)
-        });
-    };
-
-    let populateRecent = function() {
-        $scope.cloudLayers.forEachReverse(layer => {
-            if (layer.colors) populateColors(Object.values(layer.colors));
-            if (layer.texture) add('textures/sky', layer.texture);
-        });
-    };
-
+ngapp.controller('editWeatherCloudsController', function($scope) {
     $scope.addLayer = function(item) {
         let index = $scope.disabledLayers.findIndex(layer => {
             return layer.index === item.index;
@@ -41,8 +14,4 @@ ngapp.controller('editWeatherCloudsController', function($scope, $timeout, recen
         layerToAdd.disabled = true;
         $scope.disabledLayers.push(layerToAdd);
     };
-
-    // initialization
-    loadLayers();
-    $timeout(populateRecent, 500);
 });

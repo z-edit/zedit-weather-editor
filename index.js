@@ -11,7 +11,6 @@
 //= require ./src/cloudSpeedInput.js
 //= require ./src/editWeatherModal.js
 //= require ./src/editWeather/clouds.js
-//= require ./src/editWeather/colors.js
 
 ngapp.run(function(contextMenuFactory, nodeHelpers) {
     let {isRecordNode} = nodeHelpers,

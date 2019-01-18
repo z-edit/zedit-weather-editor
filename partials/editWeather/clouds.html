@@ -28,27 +28,27 @@
             </label>
         </div>
         <div>
-            <texture-selector texture="layer.texture" key="textures/sky"></texture-selector>
+            <texture-selector texture="layer.texture" key="weather/skyTextures"></texture-selector>
         </div>
         <div class="colors" ng-if="::layer.colors">
             <div>
                 <span class="color-label">Sunrise</span>
-                <color-selector color="layer.colors.Sunrise" key="colors/clouds"></color-selector>
+                <color-selector color="layer.colors.Sunrise" key="weather/cloudColors"></color-selector>
                 <alpha-input color="layer.colors.Sunrise"></alpha-input>
             </div>
             <div>
                 <span class="color-label">Day</span>
-                <color-selector color="layer.colors.Day" key="colors/clouds"></color-selector>
+                <color-selector color="layer.colors.Day" key="weather/cloudColors"></color-selector>
                 <alpha-input color="layer.colors.Day"></alpha-input>
             </div>
             <div>
                 <span class="color-label">Sunset</span>
-                <color-selector color="layer.colors.Sunset" key="colors/clouds"></color-selector>
+                <color-selector color="layer.colors.Sunset" key="weather/cloudColors"></color-selector>
                 <alpha-input color="layer.colors.Sunset"></alpha-input>
             </div>
             <div>
                 <span class="color-label">Night</span>
-                <color-selector color="layer.colors.Night" key="colors/clouds"></color-selector>
+                <color-selector color="layer.colors.Night" key="weather/cloudColors"></color-selector>
                 <alpha-input color="layer.colors.Night"></alpha-input>
             </div>
         </div>
