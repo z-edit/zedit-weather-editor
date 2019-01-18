@@ -2,3 +2,31 @@
     <div class="path">{{::path}}</div>
 </h2>
 
+<table>
+    <thead>
+    <tr>
+        <th></th>
+        <th>Sunrise</th>
+        <th>Day</th>
+        <th>Sunset</th>
+        <th>Night</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="item in dalc">
+        <td>{{::item.path}}</td>
+        <td>
+            <color-selector color="item.Sunrise" key="weather/dalc"></color-selector>
+        </td>
+        <td>
+            <color-selector color="item.Day" key="weather/dalc"></color-selector>
+        </td>
+        <td>
+            <color-selector color="item.Sunset" key="weather/dalc"></color-selector>
+        </td>
+        <td>
+            <color-selector color="item.Night" key="weather/dalc"></color-selector>
+        </td>
+    </tr>
+    </tbody>
+</table>
