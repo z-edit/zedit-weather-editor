@@ -1,10 +1,16 @@
 class TES5Weather extends Weather {
     constructor(handle) {
         super(handle);
-        this.cloudTexturePaths = ['00TX', '10TX', '20TX', '30TX', '40TX', '50TX', '60TX',
-        '70TX', '80TX', '90TX', ':0TX', ';0TX', '<0TX', '=0TX', '>0TX', '?0TX',
-        '@0TX', 'A0TX', 'B0TX', 'C0TX', 'D0TX', 'E0TX', 'F0TX', 'G0TX', 'H0TX',
-        'I0TX', 'J0TX', 'K0TX', 'L0TX'];
+        this.cloudTexturePaths = [
+            '00TX', '10TX', '20TX', '30TX', '40TX', '50TX', '60TX', '70TX',
+            '80TX', '90TX', ':0TX', ';0TX', '<0TX', '=0TX', '>0TX', '?0TX',
+            '@0TX', 'A0TX', 'B0TX', 'C0TX', 'D0TX', 'E0TX', 'F0TX', 'G0TX',
+            'H0TX', 'I0TX', 'J0TX', 'K0TX', 'L0TX'
+        ];
+        this.dalcPaths = [
+            'Directional\\X+', 'Directional\\X-', 'Directional\\Y+',
+            'Directional\\Y-', 'Directional\\Z+', 'Directional\\Z-'
+        ];
     }
 
     getCloudLayerSpeed(layerIndex) {
@@ -42,16 +48,18 @@ class TES5Weather extends Weather {
         }, {});
     }
 
-    getWeatherColors() {
-        let colors = [];
-        xelib.WithEachHandle(xelib.GetElements(this.handle, 'NAM0'), h => {
-            let group = { label: xelib.Name(h) };
-            Weather.colorLabels.forEach(label => {
-                let [r, g, b] = this.getRgb(h, label);
-                group[label] = new Color(`rgb(${r}, ${g}, ${b})`);
+    getDALC() {
+        this.dalc = this.dalcPaths.map(path => ({
+            path: path.replace('Directional\\', '')
+        }));
+        let path = 'Directional Ambient Lighting Colors';
+        xelib.WithEachHandle(xelib.GetElements(this.handle, path), h => {
+            let label = xelib.Name(h).replace('DALC - ', '');
+            this.dalcPaths.forEach((path, index) => {
+                let [r, g, b] = this.getRgb(h, path);
+                this.dalc[index][label] = new Color(`rgb(${r}, ${g}, ${b})`);
             });
-            colors.push(group);
         });
-        return colors;
+        return this.dalc;
     }
 }

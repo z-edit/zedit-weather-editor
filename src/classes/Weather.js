@@ -48,6 +48,10 @@ class Weather {
         return this.colors;
     }
 
+    getDALC() {
+        return this.dalc = null;
+    }
+
     save() {
         // TODO
     }
