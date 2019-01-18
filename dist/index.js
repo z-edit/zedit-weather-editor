@@ -1,22 +1,287 @@
 /* global ngapp, xelib, modulePath */
-ngapp.service('recentService', function() {
-    let dictionary = {};
+class Weather {
+    static get colorLabels() {
+        return ['Sunrise', 'Day', 'Sunset', 'Night'];
+    }
 
-    this.store = function(key, max) {
-        if (dictionary.hasOwnProperty(key)) return;
-        dictionary[key] = { max, items: [] };
+    constructor(handle) {
+        this.handle = handle;
+        this.cache = {};
+    }
+
+    release() {
+        Object.values(this.cache).forEach(id => xelib.Release(id));
+    }
+
+    cacheElement(path) {
+        if (!this.cache.hasOwnProperty(path))
+            this.cache[path] = xelib.GetElement(this.handle, path);
+        return this.cache[path];
+    }
+
+    getRgb(handle, path) {
+        let red = xelib.GetIntValue(handle, `${path}\\Red`),
+            green = xelib.GetIntValue(handle, `${path}\\Green`),
+            blue = xelib.GetIntValue(handle, `${path}\\Blue`);
+        return [red, green, blue];
+    }
+
+    setRgb(path, color) {
+        xelib.SetIntValue(this.handle, `${path}\\Red`, color.channel.red);
+        xelib.SetIntValue(this.handle, `${path}\\Green`, color.channel.green);
+        xelib.SetIntValue(this.handle, `${path}\\Blue`, color.channel.blue);
+    }
+
+    getCloudLayers() {
+        this.cloudLayers = this.cloudTexturePaths.map((path, index) => {
+            let texture = xelib.GetValue(this.handle, path),
+                speed = this.getCloudLayerSpeed(index),
+                disabled = this.getCloudLayerDisabled(index, texture),
+                colors = this.getCloudLayerColors(index);
+            return { index, disabled, speed, texture, colors };
+        });
+        return this.cloudLayers;
+    }
+
+    getDALC() {
+        return this.dalc = null;
+    }
+
+    saveDALC() {}
+
+    getWeatherColors() {
+        this.colors = [];
+        xelib.WithEachHandle(xelib.GetElements(this.handle, 'NAM0'), h => {
+            let group = { label: xelib.Name(h) };
+            Weather.colorLabels.forEach(label => {
+                let [r, g, b] = this.getRgb(h, label);
+                group[label] = new Color(`rgb(${r}, ${g}, ${b})`);
+            });
+            this.colors.push(group);
+        });
+        return this.colors;
+    }
+
+    saveWeatherColors() {
+        this.colors.forEach(group => {
+            Weather.colorLabels.forEach(label => {
+                this.setRgb(`NAM0\\${group.label}\\${label}`, group[label]);
+            });
+        });
+    }
+
+    saveCloudLayerTexture(layer) {
+        let texturePath = this.cloudTexturePaths[layer.index];
+        xelib.AddElementValue(this.handle, texturePath, layer.texture);
+    }
+
+    saveCloudLayerSpeed() {}
+    saveCloudLayerDisabled() {}
+    saveCloudLayerColors() {}
+
+    saveCloudLayers() {
+        this.cloudLayers.forEach(layer => {
+            if (layer.disabled) return;
+            this.saveCloudLayerTexture(layer);
+            this.saveCloudLayerSpeed(layer);
+            this.saveCloudLayerDisabled(layer);
+            this.saveCloudLayerColors(layer);
+        });
+    }
+
+    save() {
+        this.saveCloudLayers();
+        this.saveWeatherColors();
+        this.saveDALC();
+    }
+}
+class TES4Weather extends Weather {
+    constructor(handle) {
+        super(handle);
+        this.cloudTexturePaths = ['CNAM', 'DNAM'];
+    }
+
+    getCloudLayerSpeed(layerIndex) {
+        let data = this.cacheElement('DATA - ');
+        return xelib.GetIntValue(data, `[${layerIndex + 1}]`) / 255.0;
+    }
+
+    saveCloudLayerSpeed(layer) {
+        let data = this.cacheElement('DATA - '),
+            speedValue = Math.round(layer.speed * 255);
+        xelib.SetIntValue(data, `[${layer.index + 1}]`, speedValue) ;
+    }
+
+    getCloudLayerDisabled(layerIndex, texture) {
+        return !texture;
+    }
+
+    getCloudLayerColors() {
+        return null;
+    }
+}
+class FO3Weather extends Weather {
+    constructor(handle) {
+        super(handle);
+        this.cloudTexturePaths = ['DNAM', 'CNAM', 'ANAM', 'BNAM'];
+    }
+
+    getCloudLayerSpeed(layerIndex) {
+        let cloudSpeed = this.cacheElement('ONAM');
+        return xelib.GetIntValue(cloudSpeed, `[${layerIndex}]`) / 255.0;
+    }
+
+    saveCloudLayerSpeed(layer) {
+        let cloudSpeed = this.cacheElement('ONAM'),
+            speedValue = Math.round(layer.speed * 255);
+        xelib.SetIntValue(cloudSpeed, `[${layer.index}]`, speedValue);
+    }
+
+    getCloudLayerDisabled(layerIndex, texture) {
+        return !texture;
+    }
+
+    getCloudLayerColor(layerIndex, colorIndex) {
+        let path = `PNAM\\[${layerIndex}]\\[${colorIndex}]`,
+            red = xelib.GetIntValue(this.handle, `${path}\\Red`),
+            green = xelib.GetIntValue(this.handle, `${path}\\Green`),
+            blue = xelib.GetIntValue(this.handle, `${path}\\Blue`);
+        return new Color(`rgb(${red}, ${green}, ${blue})`);
+    }
+
+    saveCloudLayerColor(layer, label, colorIndex) {
+        let path = `PNAM\\[${layer.index}]\\[${colorIndex}]`;
+        this.setRgb(path, layer.colors[label]);
+    }
+
+    getCloudLayerColors(layerIndex) {
+        return Weather.colorLabels.reduce((colors, label, colorIndex) => {
+            colors[label] = this.getCloudLayerColor(layerIndex, colorIndex);
+            return colors;
+        }, {});
+    }
+
+    saveCloudLayerColors(layer) {
+        Weather.colorLabels.forEach((label, index) => {
+            this.saveCloudLayerColor(layer, label, index);
+        });
+    }
+}
+class FNVWeather extends FO3Weather {}
+class TES5Weather extends Weather {
+    constructor(handle) {
+        super(handle);
+        this.cloudTexturePaths = [
+            '00TX', '10TX', '20TX', '30TX', '40TX', '50TX', '60TX', '70TX',
+            '80TX', '90TX', ':0TX', ';0TX', '<0TX', '=0TX', '>0TX', '?0TX',
+            '@0TX', 'A0TX', 'B0TX', 'C0TX', 'D0TX', 'E0TX', 'F0TX', 'G0TX',
+            'H0TX', 'I0TX', 'J0TX', 'K0TX', 'L0TX'
+        ];
+        this.dalcPaths = [
+            'Directional\\X+', 'Directional\\X-', 'Directional\\Y+',
+            'Directional\\Y-', 'Directional\\Z+', 'Directional\\Z-'
+        ];
+    }
+
+    getCloudLayerSpeed(layerIndex) {
+        let xSpeeds = this.cacheElement('Cloud Speed\\QNAM'),
+            ySpeeds = this.cacheElement('Cloud Speed\\RNAM');
+        return {
+            x: parseFloat(xelib.GetValue(xSpeeds, `[${layerIndex}]`)),
+            y: parseFloat(xelib.GetValue(ySpeeds, `[${layerIndex}]`))
+        }
+    }
+
+    saveCloudLayerSpeed(layer) {
+        let xSpeeds = this.cacheElement('Cloud Speed\\QNAM'),
+            ySpeeds = this.cacheElement('Cloud Speed\\RNAM');
+        xelib.SetValue(xSpeeds, `[${layer.index}]`, `${layer.speed.x}`);
+        xelib.SetValue(ySpeeds, `[${layer.index}]`, `${layer.speed.y}`);
+    }
+
+    getDisabledCloudLayers() {
+        return xelib.GetEnabledFlags(this.handle, 'NAM1')
+            .map(str => parseInt(str, 10))
+    }
+
+    getCloudLayerDisabled(layerIndex) {
+        if (!this.hasOwnProperty('disabledLayers'))
+            this.disabledLayers = this.getDisabledCloudLayers();
+        return this.disabledLayers.includes(layerIndex);
+    }
+
+    saveCloudLayerDisabled(layer) {
+        xelib.SetFlag(this.handle, 'NAM1', `${layer.index}`, layer.disabled);
+    }
+
+    getCloudLayerColor(layerIndex, colorIndex) {
+        let path = `PNAM\\[${layerIndex}]\\[${colorIndex}]`,
+            alphaPath = `JNAM\\[${layerIndex}]\\[${colorIndex}]`,
+            [r, g, b] = this.getRgb(this.handle, path),
+            alpha = xelib.GetFloatValue(this.handle, alphaPath);
+        return new Color(`rgba(${r}, ${g}, ${b}, ${alpha})`);
+    }
+
+    saveCloudLayerColor(layer, label, colorIndex) {
+        let path = `PNAM\\[${layer.index}]\\[${colorIndex}]`,
+            alphaPath = `JNAM\\[${layer.index}]\\[${colorIndex}]`,
+            color = layer.colors[label],
+            alphaValue = color.channel.alpha / 255.0;
+        this.setRgb(path, color);
+        xelib.SetFloatValue(this.handle, alphaPath, alphaValue);
+    }
+
+    getCloudLayerColors(layerIndex) {
+        return Weather.colorLabels.reduce((colors, label, colorIndex) => {
+            colors[label] = this.getCloudLayerColor(layerIndex, colorIndex);
+            return colors;
+        }, {});
+    }
+
+    saveCloudLayerColors(layer) {
+        Weather.colorLabels.forEach((label, index) => {
+            this.saveCloudLayerColor(layer, label, index);
+        });
+    }
+
+    getDALC() {
+        this.dalc = this.dalcPaths.map(path => ({
+            path: path.replace('Directional\\', '')
+        }));
+        let path = 'Directional Ambient Lighting Colors';
+        xelib.WithEachHandle(xelib.GetElements(this.handle, path), h => {
+            let label = xelib.Name(h).replace('DALC - ', '');
+            this.dalcPaths.forEach((path, index) => {
+                let [r, g, b] = this.getRgb(h, path);
+                this.dalc[index][label] = new Color(`rgb(${r}, ${g}, ${b})`);
+            });
+        });
+        return this.dalc;
+    }
+
+    saveDALC() {
+        let basePath = 'Directional Ambient Lighting Colors';
+        this.dalc.forEach(item => {
+            Weather.colorLabels.forEach((label, i) => {
+                let path = `${basePath}\\[${i}]\\Directional\\${item.path}`;
+                this.setRgb(path, item[label]);
+            });
+        });
+    }
+}
+class SSEWeather extends TES5Weather {}
+class FO4Weather extends TES5Weather {}
+ngapp.service('weatherService', function() {
+    const weatherMap = {
+        TES4: TES4Weather,
+        FO3: FO3Weather,
+        FNV: FNVWeather,
+        TES5: TES5Weather,
+        SSE: SSEWeather,
+        FO4: FO4Weather
     };
 
-    this.get = function(key) {
-        return dictionary[key].items.slice();
-    };
-
-    this.add = function(key, value) {
-        let {items, max} = dictionary[key];
-        let n = items.indexOf(value);
-        (n === -1) ? items.length >= max && items.pop() : items.splice(n, 1);
-        item.shift(value);
-    };
+    this.Weather = weatherMap[xelib.GetGlobal('AppName')];
 });
 ngapp.directive('alphaInput', function() {
     return {
@@ -27,90 +292,119 @@ ngapp.directive('alphaInput', function() {
         template: '<input type="text" ng-model="alphaText" />',
         link: function(scope, element) {
             element[0].title = 'Alpha';
+            let inputElement = element[0].firstElementChild,
+                skip = false;
 
-            let thaw = () => {
-                if (!scope.freeze) return;
-                scope.freeze = false;
-                return true;
+            let notFocused = function() {
+                return document.activeElement !== inputElement;
             };
 
-            scope.$watch('color', function() {
-                if (thaw()) return;
-                scope.freeze = true;
+            let onWheel = function(e) {
+                if (e.deltaY === 0 || notFocused()) return;
+                e.preventDefault();
+                let offset = e.deltaY < 0 ? 1 : -1;
+                if (e.ctrlKey) offset *= 10;
+                try {
+                    let f = parseFloat(scope.alphaText) * 100 + offset;
+                    f = Math.max(Math.min(f, 100), 0);
+                    scope.$applyAsync(() => {
+                        scope.alphaText = (Math.round(f) / 100.0).toFixed(2);
+                    });
+                } catch (x) {}
+            };
+
+            element[0].addEventListener('wheel', onWheel);
+
+            scope.$watch('color.channel.alpha', function() {
+                if (skip) return skip = false;
                 scope.alphaText = scope.color.getAlpha();
             });
 
             scope.$watch('alphaText', function() {
-                if (thaw()) return;
-                scope.freeze = true;
                 try {
-                    scope.color.setAlpha(parseFloat(scope.alphaText));
+                    scope.color.channel.alpha = parseFloat(scope.alphaText) * 255;
+                    skip = true;
                 } catch(x) {}
             });
+
+            scope.$on('$destroy', function() {
+                element[0].removeEventListener('wheel', onWheel);
+            })
         }
     }
 });
-ngapp.directive('colorSelector', function() {
+ngapp.directive('cloudSpeedInput', function() {
     return {
         restrict: 'E',
         scope: {
-            color: '=',
-            key: '@'
+            speed: '='
         },
-        templateUrl: `${moduleUrl}/partials/colorSelector.html`,
-        controller: 'colorSelectorController'
+        template: '<input type="text" ng-model="speedText" />',
+        link: function(scope, element) {
+            let inputElement = element[0].firstElementChild,
+                skip = false;
+
+            let notFocused = function() {
+                return document.activeElement !== inputElement;
+            };
+
+            let onWheel = function(e) {
+                if (e.deltaY === 0 || notFocused()) return;
+                e.preventDefault();
+                let offset = e.deltaY < 0 ? 1 : -1;
+                if (e.ctrlKey) offset *= 10;
+                try {
+                    let f = parseFloat(scope.speedText) * 200 + offset;
+                    f = Math.max(Math.min(f, 200), -200);
+                    scope.$applyAsync(() => {
+                        scope.speedText = (Math.round(f) / 200.0).toFixed(3);
+                    });
+                } catch (x) {}
+            };
+
+            element[0].addEventListener('wheel', onWheel);
+
+            scope.$watch('speed', function() {
+                if (skip) return skip = false;
+                scope.speedText = scope.speed.toFixed(3);
+            });
+
+            scope.$watch('speedText', function() {
+                try {
+                    scope.speed = parseFloat(scope.speedText);
+                    skip = true;
+                } catch(x) {}
+            });
+
+            scope.$on('$destroy', function() {
+                element[0].removeEventListener('wheel', onWheel);
+            })
+        }
     }
 });
+ngapp.controller('editWeatherModalController', function($scope, tabService, weatherService, recentService) {
+    let {add} = recentService;
 
-ngapp.controller('colorSelectorController', function($scope, recentService) {
-    recentService.store($scope.key, 15);
-    $scope.recentColors = recentService.get($scope.key);
-
-    $scope.setCustomTexture = function({customColor}) {
-        $scope.color = customColor;
-        recentService.add($scope.key, $scope.color);
-    };
-
-    $scope.setColor = function(item) {
-        $scope.color = item.color;
-        recentService.add($scope.key, $scope.color);
-    };
-});
-ngapp.directive('textureSelector', function() {
-    return {
-        restrict: 'E',
-        scope: {
-            texture: '=',
-            key: '@'
-        },
-        templateUrl: `${moduleUrl}/partials/textureSelector.html`,
-        controller: 'textureSelectorController'
-    }
-});
-
-ngapp.controller('textureSelectorController', function($scope, recentService) {
-    recentService.store($scope.key, 10);
-    $scope.recentTextures = recentService.get($scope.key);
-
-    $scope.setCustomTexture = function({customItem}) {
-        $scope.texture = customItem.filePath;
-        recentService.add($scope.key, $scope.texture);
-    };
-
-    $scope.setTexture = function(item) {
-        $scope.texture = item.filePath;
-        recentService.add($scope.key, $scope.texture);
-    };
-});
-ngapp.controller('editWeatherModalController', function($scope, tabService) {
     // initialization
-    let node = $scope.modalOptions.nodes.last();
-    $scope.handle = node.handle;
-    $scope.name = xelib.Name($scope.handle);
-    xelib.WithHandle(xelib.GetElementFile($scope.handle), file => {
-        $scope.filename = xelib.Name(file);
+    let node = $scope.modalOptions.nodes.last(),
+        name = xelib.Name(node.handle);
+    $scope.weather = new weatherService.Weather(node.handle);
+    xelib.WithHandle(xelib.GetElementFile(node.handle), file => {
+        $scope.path = `${xelib.Name(file)}\\${name}`;
     });
 
+    // tab data initialization
+    $scope.disabledLayers = [];
+    $scope.cloudLayers = [];
+    $scope.weather.getCloudLayers().forEach(layer => {
+        let key = layer.disabled ? 'disabledLayers' : 'cloudLayers';
+        $scope[key].push(layer);
+    });
+
+    $scope.colorGroups = $scope.weather.getWeatherColors();
+    $scope.dalc = $scope.weather.getDALC();
+
+    // tab initialization
     $scope.tabs = [{
         label: 'Clouds',
         templateUrl: `${moduleUrl}/partials/editWeather/clouds.html`,
@@ -118,66 +412,67 @@ ngapp.controller('editWeatherModalController', function($scope, tabService) {
     }, {
         label: 'Colors',
         templateUrl: `${moduleUrl}/partials/editWeather/colors.html`
-    }, {
-        label: 'Directional Ambient Lighting Colors',
-        templateUrl: `${moduleUrl}/partials/editWeather/dalc.html`
     }];
 
+    if ($scope.dalc) $scope.tabs.push({
+        label: 'Directional Ambient Lighting Colors',
+        templateUrl: `${moduleUrl}/partials/editWeather/dalc.html`
+    });
+
     tabService.buildFunctions($scope);
+
+    // helper functions
+    let recentColor = function(color) {
+        color = new Color(color);
+        color.channel.alpha = 255;
+        return color;
+    };
+
+    let populateRecentCloudColors = function() {
+        recentService.store('weather/cloudColors', 11);
+        $scope.cloudLayers.forEachReverse(layer => {
+            if (!layer.colors) return;
+            Object.values(layer.colors).forEach(color => {
+                add('weather/cloudColors', recentColor(color))
+            });
+        });
+    };
+
+    let populateRecentCloudTextures = function() {
+        recentService.store('weather/skyTextures', 10);
+        $scope.cloudLayers.forEachReverse(layer => {
+            if (!layer.texture) return;
+            add('weather/skyTextures', layer.texture);
+        });
+    };
+
+    let populateRecentColorGroup = function(key, dataKey) {
+        recentService.store(key, 11);
+        $scope[dataKey].forEachReverse(group => {
+            weatherService.Weather.colorLabels.forEach(label => {
+                add(key, recentColor(group[label]));
+            });
+        });
+    };
+
+    // scope functions
+    $scope.save = function() {
+        $scope.weather.save();
+        $scope.closeModal();
+    };
+
+    $scope.closeModal = function() {
+        $scope.weather.release();
+        $scope.$emit('closeModal');
+    };
+
+    // initialization
+    populateRecentCloudColors();
+    populateRecentCloudTextures();
+    populateRecentColorGroup('weather/colors', 'colorGroups');
+    populateRecentColorGroup('weather/dalc', 'dalc');
 });
 ngapp.controller('editWeatherCloudsController', function($scope) {
-    $scope.disabledLayers = [];
-    $scope.cloudLayers = [];
-
-    let ctlChars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';',
-        '<', '=', '>', '?', '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-        'I', 'J', 'K', 'L'];
-
-    let getColor = function(colorHandle, alphaHandle, path) {
-        let alpha = xelib.GetFloatValue(alphaHandle, path),
-            red = xelib.GetIntValue(colorHandle, `${path}\\Red`),
-            green = xelib.GetIntValue(colorHandle, `${path}\\Green`),
-            blue = xelib.GetIntValue(colorHandle, `${path}\\Blue`);
-        return new Color(`rgba(${red}, ${green}, ${blue}, ${alpha})`);
-    };
-
-    let buildLayer = function(disabledLayers, index, elements) {
-        let disabled = disabledLayers.includes(index),
-            a = disabled ? $scope.disabledLayers : $scope.cloudLayers,
-            ctlPath = index < ctlChars.length && `${ctlChars[index]}0TX`,
-            {colors, alphas, xSpeeds, ySpeeds} = elements,
-            alphaHandle = xelib.GetElement(alphas, `[${index}]`),
-            colorHandle = xelib.GetElement(colors, `[${index}]`);
-        a.push({
-            index,
-            disabled,
-            xSpeed: parseFloat(xelib.GetValue(xSpeeds, `[${index}]`)),
-            ySpeed: parseFloat(xelib.GetValue(ySpeeds, `[${index}]`)),
-            texture: ctlPath && xelib.GetValue($scope.handle, ctlPath),
-            sunriseColor: getColor(colorHandle, alphaHandle, 'Sunrise'),
-            dayColor: getColor(colorHandle, alphaHandle, 'Day'),
-            sunsetColor: getColor(colorHandle, alphaHandle, 'Sunset'),
-            nightColor: getColor(colorHandle, alphaHandle, 'Night')
-        });
-    };
-
-    let loadLayers = function() {
-        let mapping = {
-            ySpeeds: 'Cloud Speed\\RNAM',
-            xSpeeds: 'Cloud Speed\\QNAM',
-            alphas: 'JNAM',
-            colors: 'PNAM'
-        };
-        let elements = {};
-        Object.keys(mapping).forEach(key => {
-            elements[key] = xelib.GetElement($scope.handle, mapping[key]);
-        });
-        let disabledLayers = xelib.GetEnabledFlags($scope.handle, 'NAM1')
-            .map(str => parseInt(str, 10));
-        for (let i = 0; i < 32; i++)
-            buildLayer(disabledLayers, i, elements);
-    };
-
     $scope.addLayer = function(item) {
         let index = $scope.disabledLayers.findIndex(layer => {
             return layer.index === item.index;
@@ -193,9 +488,6 @@ ngapp.controller('editWeatherCloudsController', function($scope) {
         layerToAdd.disabled = true;
         $scope.disabledLayers.push(layerToAdd);
     };
-
-    // initialization
-    loadLayers();
 });
 
 ngapp.run(function(contextMenuFactory, nodeHelpers) {

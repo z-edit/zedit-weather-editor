@@ -14,38 +14,42 @@
     <div class="cloud-layer" ng-repeat="layer in cloudLayers">
         <div>
             <div class="layer-name">Layer {{::layer.index}}</div>
-            <label class="layer-speed">
+            <label class="layer-speed" ng-if="::layer.speed.hasOwnProperty('x')">
                 <span>X Speed</span>
-                <input type="text" ng-model="layer.xSpeed" />
+                <cloud-speed-input speed="layer.speed.x"></cloud-speed-input>
             </label>
-            <label class="layer-speed">
+            <label class="layer-speed" ng-if="::layer.speed.hasOwnProperty('y')">
                 <span>Y Speed</span>
-                <input type="text" ng-model="layer.ySpeed" />
+                <cloud-speed-input speed="layer.speed.y"></cloud-speed-input>
+            </label>
+            <label class="layer-speed" ng-if="::!layer.speed.hasOwnProperty('x')">
+                <span>Speed</span>
+                <cloud-speed-input speed="layer.speed"></cloud-speed-input>
             </label>
         </div>
         <div>
-            <texture-selector texture="layer.texture" key="textures/sky"></texture-selector>
+            <texture-selector texture="layer.texture" key="weather/skyTextures"></texture-selector>
         </div>
-        <div class="colors">
+        <div class="colors" ng-if="::layer.colors">
             <div>
                 <span class="color-label">Sunrise</span>
-                <color-selector color="layer.sunriseColor" key="colors/weather"></color-selector>
-                <alpha-input color="layer.sunriseColor"></alpha-input>
+                <color-selector color="layer.colors.Sunrise" key="weather/cloudColors"></color-selector>
+                <alpha-input color="layer.colors.Sunrise"></alpha-input>
             </div>
             <div>
                 <span class="color-label">Day</span>
-                <color-selector color="layer.dayColor" key="colors/weather"></color-selector>
-                <alpha-input color="layer.dayColor"></alpha-input>
+                <color-selector color="layer.colors.Day" key="weather/cloudColors"></color-selector>
+                <alpha-input color="layer.colors.Day"></alpha-input>
             </div>
             <div>
                 <span class="color-label">Sunset</span>
-                <color-selector color="layer.sunsetColor" key="colors/weather"></color-selector>
-                <alpha-input color="layer.sunsetColor"></alpha-input>
+                <color-selector color="layer.colors.Sunset" key="weather/cloudColors"></color-selector>
+                <alpha-input color="layer.colors.Sunset"></alpha-input>
             </div>
             <div>
                 <span class="color-label">Night</span>
-                <color-selector color="layer.nightColor" key="colors/weather"></color-selector>
-                <alpha-input color="layer.nightColor"></alpha-input>
+                <color-selector color="layer.colors.Night" key="weather/cloudColors"></color-selector>
+                <alpha-input color="layer.colors.Night"></alpha-input>
             </div>
         </div>
         <div>
