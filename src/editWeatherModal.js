@@ -1,6 +1,4 @@
 ngapp.controller('editWeatherModalController', function($scope, tabService, weatherService, recentService) {
-    let {add} = recentService;
-
     // initialization
     let node = $scope.modalOptions.nodes.last(),
         name = xelib.Name(node.handle);
@@ -38,36 +36,11 @@ ngapp.controller('editWeatherModalController', function($scope, tabService, weat
     tabService.buildFunctions($scope);
 
     // helper functions
-    let recentColor = function(color) {
-        color = new Color(color);
-        color.channel.alpha = 255;
-        return color;
-    };
-
-    let populateRecentCloudColors = function() {
-        recentService.store('weather/cloudColors', 11);
-        $scope.cloudLayers.forEachReverse(layer => {
-            if (!layer.colors) return;
-            Object.values(layer.colors).forEach(color => {
-                add('weather/cloudColors', recentColor(color))
-            });
-        });
-    };
-
     let populateRecentCloudTextures = function() {
         recentService.store('weather/skyTextures', 10);
         $scope.cloudLayers.forEachReverse(layer => {
             if (!layer.texture) return;
-            add('weather/skyTextures', layer.texture);
-        });
-    };
-
-    let populateRecentColorGroup = function(key, dataKey) {
-        recentService.store(key, 11);
-        $scope[dataKey].forEachReverse(group => {
-            weatherService.Weather.colorLabels.forEach(label => {
-                add(key, recentColor(group[label]));
-            });
+            recentService.add('weather/skyTextures', layer.texture);
         });
     };
 
@@ -83,8 +56,5 @@ ngapp.controller('editWeatherModalController', function($scope, tabService, weat
     };
 
     // initialization
-    populateRecentCloudColors();
     populateRecentCloudTextures();
-    populateRecentColorGroup('weather/colors', 'colorGroups');
-    populateRecentColorGroup('weather/dalc', 'dalc');
 });
