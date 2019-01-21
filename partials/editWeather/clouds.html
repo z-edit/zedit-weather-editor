@@ -11,7 +11,7 @@
     </dropdown>
 </h3>
 <section class="cloud-layers">
-    <div class="cloud-layer" ng-repeat="layer in cloudLayers">
+    <div class="cloud-layer medium-border tint-bg" ng-repeat="layer in cloudLayers">
         <div>
             <div class="layer-name">Layer {{::layer.index}}</div>
             <label class="layer-speed" ng-if="::layer.speed.hasOwnProperty('x')">
