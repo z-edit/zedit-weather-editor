@@ -84,7 +84,8 @@
             <ng-include src="currentTab.templateUrl" dyn-controller="currentTab.controller" ng-class="{'flex' : currentTab.customActions}"></ng-include>
 
             <div class="primary-actions" ng-if="!currentTab.customActions">
-                <button type="button" class="action-btn" ng-click="save()">OK</button>
+                <button type="button" class="action-btn" ng-click="save()">Save</button>
+                <button type="button" class="action-btn" ng-click="closeModal()">Discard</button>
             </div>
         </div>
     </div>
